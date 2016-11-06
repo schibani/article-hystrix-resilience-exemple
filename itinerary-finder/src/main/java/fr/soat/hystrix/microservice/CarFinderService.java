@@ -43,13 +43,13 @@ public class CarFinderService {
             }
             switch (e.getFailureType()) {
                 case TIMEOUT:
-                    throw new RemoteCallException(RemoteCallException.ExceptionType.TIMEOUT, e);
+                    throw new RemoteCallException(RemoteCallException.ExceptionType.TIMEOUT, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 case SHORTCIRCUIT:
-                    throw new RemoteCallException(RemoteCallException.ExceptionType.HYSTRIX_OPEN_CIRCUIT, e);
+                    throw new RemoteCallException(RemoteCallException.ExceptionType.HYSTRIX_OPEN_CIRCUIT, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 case REJECTED_THREAD_EXECUTION:
-                    throw new RemoteCallException(RemoteCallException.ExceptionType.HYSTRIX_REJECTED_THREAD_EXECUTION, e);
+                    throw new RemoteCallException(RemoteCallException.ExceptionType.HYSTRIX_REJECTED_THREAD_EXECUTION, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 default:
-                    throw new RemoteCallException(RemoteCallException.ExceptionType.OTHER, e);
+                    throw new RemoteCallException(RemoteCallException.ExceptionType.OTHER, hystrixCommand.getExecutionTimeInMilliseconds(), e);
             }
         }
 

@@ -43,13 +43,13 @@ public class PublicTransportFinderService {
             }
             switch (e.getFailureType()) {
                 case TIMEOUT:
-                    throw new RemoteCallException(TIMEOUT, e);
+                    throw new RemoteCallException(TIMEOUT, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 case SHORTCIRCUIT:
-                    throw new RemoteCallException(HYSTRIX_OPEN_CIRCUIT, e);
+                    throw new RemoteCallException(HYSTRIX_OPEN_CIRCUIT, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 case REJECTED_THREAD_EXECUTION:
-                    throw new RemoteCallException(HYSTRIX_REJECTED_THREAD_EXECUTION, e);
+                    throw new RemoteCallException(HYSTRIX_REJECTED_THREAD_EXECUTION, hystrixCommand.getExecutionTimeInMilliseconds(), e);
                 default:
-                    throw new RemoteCallException(OTHER, e);
+                    throw new RemoteCallException(OTHER, hystrixCommand.getExecutionTimeInMilliseconds(), e);
             }
         }
 
