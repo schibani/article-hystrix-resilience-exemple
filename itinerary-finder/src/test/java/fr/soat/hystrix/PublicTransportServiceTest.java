@@ -71,7 +71,7 @@ public class PublicTransportServiceTest {
                 assertThat(e.getCallDuration()).isCloseTo(DEPENDENCY_TIMEOUT, Offset.offset(100));
             }
         }
-        // faire un appel après que le seuil ait atteint
+        // faire un appel après que le seuil OPEN_CIRCUIT_THRESHOLD soit atteint
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS); // on attend 1 seconde pour laisser le temps à hystrix d'ouvrir le circuit
         System.out.println(String.format("appel %d >> %s", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
         publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
@@ -108,7 +108,7 @@ public class PublicTransportServiceTest {
             }
         }
 
-        // faire un appel après que le seuil ait atteint
+        // faire un appel après que le seuil OPEN_CIRCUIT_THRESHOLD soit atteint
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS); // on attend 1 seconde pour laisser le temps à hystrix d'ouvrir le circuit
         try {
             publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
