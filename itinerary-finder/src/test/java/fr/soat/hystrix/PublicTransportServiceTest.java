@@ -117,7 +117,6 @@ public class PublicTransportServiceTest {
             assertThat(e.getExceptionType() == ExceptionType.HYSTRIX_OPEN_CIRCUIT);
         }
         //On attend que le circuit se referme
-        final int sleepFor = OPEN_CIRCUIT_DURATION; // 100 ms de marge
         System.out.println(String.format("attendre %d ms, la durée d'ouverture du circuit ...", OPEN_CIRCUIT_DURATION));
         Uninterruptibles.sleepUninterruptibly(OPEN_CIRCUIT_DURATION, TimeUnit.MILLISECONDS);
 
