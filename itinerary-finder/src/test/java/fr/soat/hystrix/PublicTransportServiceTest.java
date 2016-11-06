@@ -57,7 +57,7 @@ public class PublicTransportServiceTest {
 
         final int responseDelay = DEPENDENCY_TIMEOUT + 100; // marge de 100 ms
 
-        WireMock.stubFor(WireMock.any(WireMock.urlMatching(".*")).willReturn(
+        WireMock.stubFor(WireMock.any(WireMock.urlMatching(".*itineraries/publicTransportRemote/find.*")).willReturn(
                 WireMock.aResponse().withFixedDelay(responseDelay))
         );
 
@@ -91,7 +91,7 @@ public class PublicTransportServiceTest {
 
         final int responseDelay = DEPENDENCY_TIMEOUT + 100;
 
-        WireMock.stubFor(WireMock.any(WireMock.urlMatching(".*")).willReturn(
+        WireMock.stubFor(WireMock.any(WireMock.urlMatching(".*itineraries/publicTransportRemote/find.*")).willReturn(
                 WireMock.aResponse().withStatus(
                         Response.Status.OK.getStatusCode()
                 ).withFixedDelay(responseDelay)
