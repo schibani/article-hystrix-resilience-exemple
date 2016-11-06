@@ -116,7 +116,7 @@ public class PublicTransportServiceTest {
             System.out.println(String.format("appel %d >> %s", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
             assertThat(e.getExceptionType() == ExceptionType.HYSTRIX_OPEN_CIRCUIT);
         }
-        //On attend que le circuit se referme
+        //On attend que le circuit se ferme
         System.out.println(String.format("attendre %d ms, la durée d'ouverture du circuit ...", OPEN_CIRCUIT_DURATION));
         Uninterruptibles.sleepUninterruptibly(OPEN_CIRCUIT_DURATION, TimeUnit.MILLISECONDS);
 
