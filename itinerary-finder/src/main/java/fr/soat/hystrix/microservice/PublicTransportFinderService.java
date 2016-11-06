@@ -1,7 +1,10 @@
 package fr.soat.hystrix.microservice;
 
-import com.netflix.hystrix.*;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import fr.soat.hystrix.Constantes;
 import fr.soat.hystrix.config.ClientJersey;
 import fr.soat.hystrix.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,21 +17,17 @@ import javax.ws.rs.core.UriBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.soat.hystrix.Constantes.*;
 import static fr.soat.hystrix.model.RemoteCallException.ExceptionType.*;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 @Component
 public class PublicTransportFinderService {
 
-    private final String URI = "http://localhost:8091";
     @Autowired
     ClientJersey clientJersey;
-    private HystrixCommandGroupKey PT_HYSTRIX_COMMAND_GROUP_KEY = HystrixCommandGroupKey.Factory.asKey("PublicTransport");
-    private HystrixCommandKey PT_HYSTRIX_COMMAND_KEY = HystrixCommandKey.Factory.asKey("PublicTransport");
-    private HystrixThreadPoolKey PT_HYSTRIX_POOL_KEY = HystrixThreadPoolKey.Factory.asKey("PublicTransport");
 
     public ItineraryResponse search(String from, String to) {
-
         Response response = null;
         final ItineraryResponse itineraryResponse;
         PTHystrixCommand hystrixCommand = null;
@@ -63,8 +62,8 @@ public class PublicTransportFinderService {
     }
 
     private UriBuilder getUriBuilder(String from, String to) {
-        return UriBuilder.fromUri(URI)
-                .path("itineraries/publicTransportRemote/find")
+        return UriBuilder.fromUri(PT_REMOTE_URI)
+                .path(Constantes.PT_JERSEY_PATH)
                 .queryParam("from", from)
                 .queryParam("to", to);
     }
@@ -107,12 +106,12 @@ public class PublicTransportFinderService {
                             .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                                     .withCoreSize(10))
                             .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                                    .withExecutionTimeoutInMilliseconds(3000)
-                                    .withCircuitBreakerRequestVolumeThreshold(2)
+                                    .withExecutionTimeoutInMilliseconds(2000)
+                                    .withCircuitBreakerRequestVolumeThreshold(5)
                                     .withCircuitBreakerErrorThresholdPercentage(50)
-                                    //.withFallbackEnabled(false)
+                                    .withFallbackEnabled(false)
                                     .withMetricsRollingStatisticalWindowInMilliseconds(10000)
-                                    .withCircuitBreakerSleepWindowInMilliseconds(10000)));
+                                    .withCircuitBreakerSleepWindowInMilliseconds(5000)));
 
             this.request = request;
         }

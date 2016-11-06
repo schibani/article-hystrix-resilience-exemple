@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MainBootstrap {
     public static void main(String[] args) {
-
-        SpringApplication.run(PtBootstrap.class, args);
+        SpringApplication.run(MainBootstrap.class, args);
     }
 }

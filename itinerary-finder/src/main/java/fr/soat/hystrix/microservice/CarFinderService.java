@@ -1,7 +1,10 @@
 package fr.soat.hystrix.microservice;
 
-import com.netflix.hystrix.*;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import fr.soat.hystrix.Constantes;
 import fr.soat.hystrix.config.ClientJersey;
 import fr.soat.hystrix.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +17,14 @@ import javax.ws.rs.core.UriBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.soat.hystrix.Constantes.*;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 @Component
 public class CarFinderService {
 
-    private final String URI = "http://localhost:8090";
     @Autowired
     ClientJersey clientJersey;
-    private HystrixCommandGroupKey CAR_HYSTRIX_COMMAND_GROUP_KEY = HystrixCommandGroupKey.Factory.asKey("Car");
-    private HystrixCommandKey CAR_HYSTRIX_COMMAND_KEY = HystrixCommandKey.Factory.asKey("Car");
-    private HystrixThreadPoolKey CAR_HYSTRIX_POOL_KEY = HystrixThreadPoolKey.Factory.asKey("Car");
 
     public ItineraryResponse search(String from, String to) {
         final ItineraryResponse itineraryResponse;
@@ -62,8 +62,8 @@ public class CarFinderService {
     }
 
     private UriBuilder getUriBuilder(String from, String to) {
-        return UriBuilder.fromUri(URI)
-                .path("itineraries/carRemote/find")
+        return UriBuilder.fromUri(CAR_REMOTE_URI)
+                .path(Constantes.CAR_JERSEY_PATH)
                 .queryParam("from", from)
                 .queryParam("to", to);
     }
@@ -106,11 +106,11 @@ public class CarFinderService {
                             .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                                     .withCoreSize(10))
                             .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                                    .withExecutionTimeoutInMilliseconds(3000)
-                                    .withCircuitBreakerRequestVolumeThreshold(2)
+                                    .withExecutionTimeoutInMilliseconds(2000)
+                                    .withCircuitBreakerRequestVolumeThreshold(5)
                                     .withCircuitBreakerErrorThresholdPercentage(50)
                                     .withMetricsRollingStatisticalWindowInMilliseconds(10000)
-                                    .withCircuitBreakerSleepWindowInMilliseconds(10000)));
+                                    .withCircuitBreakerSleepWindowInMilliseconds(5000)));
 
             this.request = request;
         }
