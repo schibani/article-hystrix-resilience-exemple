@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static fr.soat.hystrix.model.RemoteCallException.ExceptionType.HYSTRIX_OPEN_CIRCUIT;
-import static fr.soat.hystrix.model.RemoteCallException.ExceptionType.TIMEOUT;
 import static org.assertj.core.api.StrictAssertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -86,9 +85,6 @@ public class PublicTransportServiceTest {
     @Test
     public void hystrix_circuitOpen_CircuitIsClosedWhenDurationIsReached() {
         // Given
-        exception.expect(RemoteCallException.class);
-        exception.expect(new RemoteExceptionTypeMatcher(TIMEOUT));
-
         final int responseDelay = DEPENDENCY_TIMEOUT + 100;
 
         WireMock.stubFor(WireMock.any(WireMock.urlMatching(".*itineraries/publicTransportRemote/find.*")).willReturn(
@@ -120,9 +116,20 @@ public class PublicTransportServiceTest {
         System.out.println(String.format("attendre %d ms, la durée d'ouverture du circuit ...", OPEN_CIRCUIT_DURATION));
         Uninterruptibles.sleepUninterruptibly(OPEN_CIRCUIT_DURATION, TimeUnit.MILLISECONDS);
 
-        //On fait une nouvelle tentative qui doit être en timeout
-        System.out.println("appel après fermeture du circuit >> TIMEOUT");
-        publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
-        //Then : exception
+        // On fait une nouvelle tentative qui doit être en timeout et le circuit s'ouvre de nouveau
+        try {
+            publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
+        } catch (RemoteCallException e) {
+            System.out.println("appel après expiration du délai OPEN_CIRCUIT_DURATION >> TIMEOUT");
+            assertThat(e.getExceptionType() == ExceptionType.TIMEOUT);
+        }
+
+        // On fait un autre appel et maintenant le circuit est bien ouvert de nouveau
+        try {
+            publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
+        } catch (RemoteCallException e) {
+            System.out.println("appel après réouverture du circuit >> HYSTRIX_OPEN_CIRCUIT");
+            assertThat(e.getExceptionType() == ExceptionType.HYSTRIX_OPEN_CIRCUIT);
+        }
     }
 }
