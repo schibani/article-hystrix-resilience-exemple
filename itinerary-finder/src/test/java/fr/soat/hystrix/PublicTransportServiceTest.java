@@ -65,14 +65,14 @@ public class PublicTransportServiceTest {
             try {
                 publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
             } catch (RemoteCallException e) {
-                System.out.println(String.format("appel %d sur %d >> %s", i + 1, OPEN_CIRCUIT_THRESHOLD, ExceptionType.TIMEOUT.name()));
+                System.out.println(String.format("appel %d sur %d >> %s >> durée : %d ms", i + 1, OPEN_CIRCUIT_THRESHOLD, ExceptionType.TIMEOUT.name(), e.getCallDuration()));
                 assertThat(e.getExceptionType() == ExceptionType.TIMEOUT);
                 assertThat(e.getCallDuration()).isCloseTo(DEPENDENCY_TIMEOUT, Offset.offset(100));
             }
         }
         // faire un appel après que le seuil OPEN_CIRCUIT_THRESHOLD soit atteint
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS); // on attend 1 seconde pour laisser le temps à hystrix d'ouvrir le circuit
-        System.out.println(String.format("appel %d >> %s", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
+        System.out.println(String.format("appel %d >> %s >> durée : -1", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
         publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
         // Then --> exception levée
     }
@@ -99,7 +99,7 @@ public class PublicTransportServiceTest {
             try {
                 publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
             } catch (RemoteCallException e) {
-                System.out.println(String.format("appel %d sur %d >> %s", i + 1, OPEN_CIRCUIT_THRESHOLD, ExceptionType.TIMEOUT.name()));
+                System.out.println(String.format("appel %d sur %d >> %s >> durée : %d ms", i + 1, OPEN_CIRCUIT_THRESHOLD, ExceptionType.TIMEOUT.name(), e.getCallDuration()));
                 assertThat(e.getExceptionType() == ExceptionType.TIMEOUT);
             }
         }
@@ -109,7 +109,7 @@ public class PublicTransportServiceTest {
         try {
             publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
         } catch (RemoteCallException e) {
-            System.out.println(String.format("appel %d >> %s", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
+            System.out.println(String.format("appel %d >> %s >> durée : -1", OPEN_CIRCUIT_THRESHOLD + 1, ExceptionType.HYSTRIX_OPEN_CIRCUIT.name()));
             assertThat(e.getExceptionType() == ExceptionType.HYSTRIX_OPEN_CIRCUIT);
         }
         //On attend que le circuit se ferme
@@ -120,7 +120,7 @@ public class PublicTransportServiceTest {
         try {
             publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
         } catch (RemoteCallException e) {
-            System.out.println("appel après expiration du délai OPEN_CIRCUIT_DURATION >> TIMEOUT");
+            System.out.println("appel après expiration du délai OPEN_CIRCUIT_DURATION (HALF-OPEN) >> TIMEOUT");
             assertThat(e.getExceptionType() == ExceptionType.TIMEOUT);
         }
 
@@ -128,7 +128,7 @@ public class PublicTransportServiceTest {
         try {
             publicTransportFinderService.search(Mockito.anyString(), Mockito.anyString());
         } catch (RemoteCallException e) {
-            System.out.println("appel après réouverture du circuit >> HYSTRIX_OPEN_CIRCUIT");
+            System.out.println("appel après état HALF-OPEN >> HYSTRIX_OPEN_CIRCUIT");
             assertThat(e.getExceptionType() == ExceptionType.HYSTRIX_OPEN_CIRCUIT);
         }
     }
